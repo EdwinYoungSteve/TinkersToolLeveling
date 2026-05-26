@@ -41,7 +41,7 @@ public final class EventHandler {
     toolTag.setInteger(Tags.FREE_MODIFIERS, modifiers);
     TagUtil.setToolTag(event.tag, toolTag);
 
-    if(TinkerUtil.getModifierTag(event.tag, TinkerToolLeveling.modToolLeveling.getModifierIdentifier()).hasNoTags()) {
+    if(TinkerUtil.getModifierTag(event.tag, TinkerToolLeveling.modToolLeveling.getModifierIdentifier()).isEmpty()) {
       TinkerToolLeveling.modToolLeveling.apply(event.tag);
     }
 
