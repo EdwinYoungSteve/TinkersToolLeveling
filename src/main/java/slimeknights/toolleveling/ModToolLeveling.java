@@ -149,28 +149,58 @@ public class ModToolLeveling extends ProjectileModifierTrait {
 
   /* XP Handling */
 
-  public void addXp(ItemStack tool, int amount, EntityPlayer player) {
+  public void addXp(ItemStack tool, long amount, EntityPlayer player) {
     NBTTagList tagList = TagUtil.getModifiersTagList(tool);
     int index = TinkerUtil.getIndexInCompoundList(tagList, identifier);
     NBTTagCompound modifierTag = tagList.getCompoundTagAt(index);
 
     ToolLevelNBT data = getLevelData(modifierTag);
-    data.xp += amount;
+    // saturate on overflow instead of wrapping negative
+    if(amount > 0 && data.xp > Long.MAX_VALUE - amount) {
+      data.xp = Long.MAX_VALUE;
+    } else if(amount > 0) {
+      data.xp += amount;
+    }
+    // negative xp is invalid, clamp to 0
+    if(data.xp < 0) {
+      data.xp = 0;
+    }
 
     // is max level?
     if(!Config.canLevelUp(data.level)) {
       return;
     }
 
-    int xpForLevelup = getXpForLevelup(data.level, tool);
-
     boolean leveledUp = false;
-    // check for levelup
-    if(data.xp >= xpForLevelup) {
+    int totalLevelUps = 0;
+    // loop to handle multiple levelups at once (e.g. from debug command)
+    while(Config.canLevelUp(data.level)) {
+      long xpForLevelup = getXpForLevelup(data.level, tool);
+      // guard against overflow/zero in xp calculation
+      if(xpForLevelup <= 0 || data.xp < xpForLevelup) {
+        break;
+      }
+      // guard against xp curve overflow: if xpForLevelup is at or near Long.MAX_VALUE,
+      // the tool has reached its effective max level. cap XP below threshold to prevent reset to 0.
+      if(xpForLevelup >= Long.MAX_VALUE - 1000) {
+        if(data.xp >= xpForLevelup) {
+          data.xp = xpForLevelup - 1;
+        }
+        break;
+      }
       data.xp -= xpForLevelup;
       data.level++;
       data.bonusModifiers++;
       leveledUp = true;
+      totalLevelUps++;
+      // safety cap to prevent infinite loops with flat XP curves
+      if(totalLevelUps >= 1000) {
+        break;
+      }
+    }
+    // final safety clamp
+    if(data.xp < 0) {
+      data.xp = 0;
     }
 
     data.write(modifierTag);
@@ -195,11 +225,11 @@ public class ModToolLeveling extends ProjectileModifierTrait {
     }
   }
 
-  public int getXpForLevelup(int level, ItemStack tool) {
+  public long getXpForLevelup(int level, ItemStack tool) {
     if(level <= 1) {
       return Config.getBaseXpForTool(tool.getItem());
     }
-    return (int) ((float) getXpForLevelup(level - 1, tool) * Config.getLevelMultiplier());
+    return (long) ((float) getXpForLevelup(level - 1, tool) * Config.getLevelMultiplier());
   }
 
   private ToolLevelNBT getLevelData(ItemStack itemStack) {
