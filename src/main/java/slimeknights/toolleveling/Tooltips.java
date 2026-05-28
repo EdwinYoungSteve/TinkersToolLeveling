@@ -30,11 +30,11 @@ public final class Tooltips {
   }
 
 
-  private static String getXpToolTip(long xp, long xpNeeded) {
+  private static String getXpToolTip(int xp, int xpNeeded) {
     return String.format("%s: %s", I18n.translateToLocal("tooltip.xp"), getXpString(xp, xpNeeded));
   }
 
-  private static String getXpString(long xp, long xpNeeded) {
+  private static String getXpString(int xp, int xpNeeded) {
     return TextFormatting.WHITE + String.format("%d / %d", xp, xpNeeded);
     //float xpPercentage = (float)xp / (float)xpNeeded * 100f;
     //return String.format("%.2f", xpPercentage) + "%"

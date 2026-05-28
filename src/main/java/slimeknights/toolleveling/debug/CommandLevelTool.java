@@ -35,15 +35,15 @@ public class CommandLevelTool extends CommandBase {
     ItemStack itemStack = player.getHeldItemMainhand();
 
     if(itemStack != null && itemStack.getItem() instanceof ToolCore) {
-      long xp;
+      int xp;
       if(args.length > 0) {
-        xp = Long.parseLong(args[0]);
-        System.out.println("[ToolLeveling] Adding " + xp + " XP (max: " + Long.MAX_VALUE + ")");
+        xp = Integer.parseInt(args[0]);
+        System.out.println("[ToolLeveling] Adding " + xp + " XP (max: " + Integer.MAX_VALUE + ")");
       }
       else {
         ToolLevelNBT data = new ToolLevelNBT(TinkerUtil.getModifierTag(itemStack, TinkerToolLeveling.modToolLeveling.getModifierIdentifier()));
         xp = TinkerToolLeveling.modToolLeveling.getXpForLevelup(data.level, itemStack);
-        System.out.println("[ToolLeveling] Adding levelup XP " + xp + " for level " + data.level + " (max: " + Long.MAX_VALUE + ")");
+        System.out.println("[ToolLeveling] Adding levelup XP " + xp + " for level " + data.level + " (max: " + Integer.MAX_VALUE + ")");
       }
       TinkerToolLeveling.modToolLeveling.addXp(itemStack, xp, player);
     }

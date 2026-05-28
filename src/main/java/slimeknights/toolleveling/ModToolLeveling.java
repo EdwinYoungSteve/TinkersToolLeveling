@@ -149,15 +149,15 @@ public class ModToolLeveling extends ProjectileModifierTrait {
 
   /* XP Handling */
 
-  public void addXp(ItemStack tool, long amount, EntityPlayer player) {
+  public void addXp(ItemStack tool, int amount, EntityPlayer player) {
     NBTTagList tagList = TagUtil.getModifiersTagList(tool);
     int index = TinkerUtil.getIndexInCompoundList(tagList, identifier);
     NBTTagCompound modifierTag = tagList.getCompoundTagAt(index);
 
     ToolLevelNBT data = getLevelData(modifierTag);
     // saturate on overflow instead of wrapping negative
-    if(amount > 0 && data.xp > Long.MAX_VALUE - amount) {
-      data.xp = Long.MAX_VALUE;
+    if(amount > 0 && data.xp > Integer.MAX_VALUE - amount) {
+      data.xp = Integer.MAX_VALUE;
     } else if(amount > 0) {
       data.xp += amount;
     }
@@ -175,14 +175,14 @@ public class ModToolLeveling extends ProjectileModifierTrait {
     int totalLevelUps = 0;
     // loop to handle multiple levelups at once (e.g. from debug command)
     while(Config.canLevelUp(data.level)) {
-      long xpForLevelup = getXpForLevelup(data.level, tool);
+      int xpForLevelup = getXpForLevelup(data.level, tool);
       // guard against overflow/zero in xp calculation
       if(xpForLevelup <= 0 || data.xp < xpForLevelup) {
         break;
       }
-      // guard against xp curve overflow: if xpForLevelup is at or near Long.MAX_VALUE,
+      // guard against xp curve overflow: if xpForLevelup is at or near Integer.MAX_VALUE,
       // the tool has reached its effective max level. cap XP below threshold to prevent reset to 0.
-      if(xpForLevelup >= Long.MAX_VALUE - 1000) {
+      if(xpForLevelup >= Integer.MAX_VALUE - 1000) {
         if(data.xp >= xpForLevelup) {
           data.xp = xpForLevelup - 1;
         }
@@ -225,11 +225,11 @@ public class ModToolLeveling extends ProjectileModifierTrait {
     }
   }
 
-  public long getXpForLevelup(int level, ItemStack tool) {
+  public int getXpForLevelup(int level, ItemStack tool) {
     if(level <= 1) {
       return Config.getBaseXpForTool(tool.getItem());
     }
-    return (long) ((float) getXpForLevelup(level - 1, tool) * Config.getLevelMultiplier());
+    return (int) ((float) getXpForLevelup(level - 1, tool) * Config.getLevelMultiplier());
   }
 
   private ToolLevelNBT getLevelData(ItemStack itemStack) {
