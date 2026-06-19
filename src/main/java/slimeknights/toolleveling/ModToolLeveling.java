@@ -23,15 +23,12 @@ import slimeknights.tconstruct.library.events.TinkerToolEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierAspect;
 import slimeknights.tconstruct.library.modifiers.ModifierTrait;
 import slimeknights.tconstruct.library.modifiers.ProjectileModifierTrait;
-import slimeknights.tconstruct.library.modifiers.TinkerGuiException;
-import slimeknights.tconstruct.library.tinkering.TinkersItem;
 import slimeknights.tconstruct.library.tools.ProjectileLauncherNBT;
 import slimeknights.tconstruct.library.tools.ranged.BowCore;
 import slimeknights.tconstruct.library.traits.IProjectileTrait;
 import slimeknights.tconstruct.library.utils.TagUtil;
 import slimeknights.tconstruct.library.utils.Tags;
 import slimeknights.tconstruct.library.utils.TinkerUtil;
-import slimeknights.tconstruct.library.utils.ToolBuilder;
 import slimeknights.tconstruct.library.utils.ToolHelper;
 import slimeknights.tconstruct.tools.melee.TinkerMeleeWeapons;
 import slimeknights.toolleveling.capability.CapabilityDamageXp;
@@ -208,21 +205,20 @@ public class ModToolLeveling extends ProjectileModifierTrait {
     TagUtil.setModifiersTagList(tool, tagList);
 
     if(leveledUp) {
-      this.apply(tool);
+      addFreeModifiers(tool, totalLevelUps);
       if(!player.world.isRemote) {
         // for some reason the proxy is messed up. cba to fix now
         TinkerToolLeveling.proxy.playLevelupDing(player);
         TinkerToolLeveling.proxy.sendLevelUpMessage(data.level, tool, player);
       }
-      try {
-        NBTTagCompound rootTag = TagUtil.getTagSafe(tool);
-        ToolBuilder.rebuildTool(rootTag, (TinkersItem) tool.getItem());
-        tool.setTagCompound(rootTag);
-      } catch(TinkerGuiException e) {
-        // this should never happen
-        e.printStackTrace();
-      }
     }
+  }
+
+  private void addFreeModifiers(ItemStack tool, int amount) {
+    NBTTagCompound toolTag = TagUtil.getToolTag(tool);
+    int modifiers = toolTag.getInteger(Tags.FREE_MODIFIERS) + amount;
+    toolTag.setInteger(Tags.FREE_MODIFIERS, Math.max(0, modifiers));
+    TagUtil.setToolTag(tool, toolTag);
   }
 
   public int getXpForLevelup(int level, ItemStack tool) {
