@@ -18,6 +18,7 @@ import slimeknights.toolleveling.capability.CapabilityDamageXp;
 import slimeknights.toolleveling.config.Config;
 import slimeknights.toolleveling.config.ConfigSync;
 import slimeknights.toolleveling.config.ConfigSyncPacket;
+import slimeknights.toolleveling.compat.conarm.ConArmCompat;
 import slimeknights.toolleveling.debug.CommandLevelTool;
 
 @Mod(modid = TinkerToolLeveling.MODID,
@@ -25,7 +26,8 @@ import slimeknights.toolleveling.debug.CommandLevelTool;
     name = "TinkerToolLeveling",
     dependencies = "required-after:forge@[14.21.1.2410,);"
                    + "required-after:mantle@[1.12-1.3.1.21,);"
-                   + "required-after:tconstruct@[1.12-2.10,)",
+                   + "required-after:tconstruct@[1.12-2.10,);"
+                   + "after:conarm",
     acceptedMinecraftVersions = "[1.12,1.13)"
 )
 public class TinkerToolLeveling {
@@ -60,6 +62,7 @@ public class TinkerToolLeveling {
 
   @EventHandler
   public void postInit(FMLPostInitializationEvent event) {
+    ConArmCompat.install();
     MinecraftForge.EVENT_BUS.register(slimeknights.toolleveling.EventHandler.INSTANCE);
     MinecraftForge.EVENT_BUS.register(EntityXpHandler.INSTANCE);
     if(event.getSide().isServer()) {

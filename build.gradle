@@ -128,6 +128,7 @@ dependencies {
 
     implementation rfg.deobf("curse.maven:Mantle-74924:2713386")
     implementation rfg.deobf("curse.maven:TConstruct-74072:2902483")
+    compileOnly rfg.deobf("curse.maven:constructs-armory-287683:3174535")
 
     if (propertyBool('use_asset_mover')) {
         implementation "com.cleanroommc:assetmover:${propertyString('asset_mover_version')}"
